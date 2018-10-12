@@ -1,0 +1,3 @@
+[submodule "ext/snow"]
+	path = ext/snow
+	url = https://github.com/chaiyujin/snow.git
