@@ -1,3 +1,7 @@
+assets/*
+face_*/build/*
+*DS_Store*
+
 # Prerequisites
 *.d
 
