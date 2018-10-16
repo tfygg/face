@@ -47,6 +47,20 @@
         "__config": "cpp",
         "__nullptr": "cpp",
         "new": "cpp",
-        "optional": "cpp"
+        "optional": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "functional": "cpp",
+        "system_error": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp",
+        "chrono": "cpp",
+        "complex": "cpp",
+        "deque": "cpp",
+        "forward_list": "cpp",
+        "list": "cpp",
+        "unordered_set": "cpp",
+        "ratio": "cpp",
+        "valarray": "cpp"
     }
 }

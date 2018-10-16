@@ -1,7 +1,15 @@
 import os
 import h5py
+import struct
 
-h5_path = '../assets/ProbabilisticMorphableModels/data/model2017-1_bfm_nomouth.h5'
+# h5_path = '../assets/ProbabilisticMorphableModels/data/'
+h5_path = "/media/chaiyujin/FE6C78966C784B81/Linux/ThirdParty/ProbabilisticMorphableModels/data/"
+
+model_paths = {
+    "head": "model2017-1_bfm_nomouth.h5",
+    "face": "model2017-1_face12_nomouth.h5"
+}
+
 
 class H5Util:
     def __init__(self, file_path):
@@ -26,8 +34,16 @@ class H5Util:
     def _write(self, data, prefix):
         path = prefix + "_" + data["version"] + ".bin"
         def bin_write(fp, attr):
-            pass
-        print(data["mean"].shape, data["mean"].ndim)
+            fp.write(struct.pack('i', attr.ndim))
+            for idim in range(attr.ndim):
+                fp.write(struct.pack('i', attr.shape[idim]))
+            print("dim: {}, shape: {}".format(attr.ndim, attr.shape[:attr.ndim]))
+            attr.tofile(fp)
+        with open(path, "wb") as fp:
+            bin_write(fp, data["mean"])
+            bin_write(fp, data["pcaBasis"])
+            bin_write(fp, data["pcaVariance"])
+            bin_write(fp, data["noiseVariance"])
 
     def _export_color(self, output_dir):
         self.color = self._read_group("/color/")
@@ -48,5 +64,7 @@ class H5Util:
         self._export_expression(output_dir)
 
 
-util = H5Util(h5_path)
-util.export("../assets/basel/")
+for k in model_paths:
+    model_name = model_paths[k]
+    util = H5Util(os.path.join(h5_path, model_name))
+    util.export("../assets/basel/{}/".format(k))
