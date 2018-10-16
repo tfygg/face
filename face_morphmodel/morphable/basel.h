@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <snow.h>
 
 class BaselModel;
 class ProbabilisticModel {
@@ -28,12 +29,16 @@ private:
     static BaselModel *LoadBaselModel(std::string root, std::string type, std::string version);
     static void Clear();
     
-    std::string         mType;
-    ProbabilisticModel  mColor;
-    ProbabilisticModel  mShape;
-    ProbabilisticModel  mExpression;
+    std::string                 mType;
+    ProbabilisticModel          mColor;
+    ProbabilisticModel          mShape;
+    ProbabilisticModel          mExpression;
+    // visualization
+    std::vector<snow::float3>   mPointList;
+    std::vector<snow::int3>     mTriangleList;
 
-    BaselModel(std::string type, std::string colorPath, std::string shapePath, std::string expressionPath);
+    BaselModel(std::string type, std::string colorPath, std::string shapePath,
+               std::string expressionPath, std::string templatePath);
     ~BaselModel();
 public:
 

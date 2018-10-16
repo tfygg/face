@@ -13,5 +13,6 @@ add_definitions(${SNOW_DEFINITIONS})
 add_executable(${PROJECT_NAME}
     ${PROJECT_SOURCE_DIR}/main.cpp
     ${PROJECT_SOURCE_DIR}/morphable/basel.cpp
+    ${PROJECT_SOURCE_DIR}/visualization/window.cpp
 )
 target_link_libraries(${PROJECT_NAME} snow)

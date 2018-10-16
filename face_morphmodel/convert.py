@@ -70,16 +70,16 @@ class H5Util:
             for idim in range(attr.ndim):
                 fp.write(struct.pack('i', attr.shape[idim]))
             attr.tofile(fp)
-            # print("dim: {}, shape: {}".format(attr.ndim, attr.shape[:attr.ndim]))
+            print("dim: {}, shape: {}".format(attr.ndim, attr.shape[:attr.ndim]))
         with open(os.path.join(output_dir, "template.bin"), "wb") as fp:
-            bin_write(fp, self.file["/shape/representer/cells"].value)
-            bin_write(fp, self.file["/shape/representer/points"].value)
+            bin_write(fp, self.file["/shape/representer/cells"].value.T)
+            bin_write(fp, self.file["/shape/representer/points"].value.T)
 
     def export(self, output_dir):
-        # os.makedirs(output_dir, exist_ok=True)
-        # self._export_color(output_dir)
-        # self._export_shape(output_dir)
-        # self._export_expression(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
+        self._export_color(output_dir)
+        self._export_shape(output_dir)
+        self._export_expression(output_dir)
         self._export_landmark(output_dir)
         self._export_representer(output_dir)
 
