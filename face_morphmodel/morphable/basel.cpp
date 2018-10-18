@@ -10,10 +10,10 @@ ProbabilisticModel::ProbabilisticModel()
     , mPCAVariancePtr(nullptr)
     , mNoiseVariancePtr(nullptr) {}
 ProbabilisticModel::ProbabilisticModel(const ProbabilisticModel &other)
-    : mMeanPtr(mMeanPtr)
-    , mPCABasisPtr(mPCABasisPtr)
-    , mPCAVariancePtr(mPCAVariancePtr)
-    , mNoiseVariancePtr(mNoiseVariancePtr) {}
+    : mMeanPtr(other.mMeanPtr)
+    , mPCABasisPtr(other.mPCABasisPtr)
+    , mPCAVariancePtr(other.mPCAVariancePtr)
+    , mNoiseVariancePtr(other.mNoiseVariancePtr) {}
 
 void ProbabilisticModel::loadFrom(std::ifstream &fin) {
     auto read = [&](double **ptr, std::vector<int32_t> &shape) -> void {

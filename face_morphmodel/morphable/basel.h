@@ -41,7 +41,6 @@ private:
                std::string expressionPath, std::string templatePath);
     ~BaselModel();
 public:
-
     static void Initialize(std::string root, std::string type, std::string version) { LoadBaselModel(root, type, version); }
-
+    static const std::vector<snow::int3> &TriangleList() {}
 };

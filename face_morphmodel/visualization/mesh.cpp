@@ -1,4 +1,3 @@
-#define SNOW_MODULE_OPENGL
 #include "mesh.h"
 
 #define VERT_CODE ""\
@@ -45,7 +44,8 @@
 
 
 FaceMesh::FaceMesh(int numVertices, int numTriangles)
-    : mVertexList(numVertices), mIndiceList(numTriangles * 3)
+    : mVertexList(numVertices, {{0.f, 0.f, 0.f}, {1.f, 0.f}, {-1.f, -1.f}, {1.f, 1.f, 1.f}})
+    , mIndiceList(numTriangles * 3)
     , mVAO(0), mVBO(0), mEBO(0) {
     mShader.buildFromCode(VERT_CODE, FRAG_CODE);
     // allocate opengl

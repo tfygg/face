@@ -13,7 +13,7 @@ struct FaceVertex {
 class FaceMesh {
     std::vector<FaceVertex>  mVertexList;
     std::vector<int32_t>     mIndiceList;
-    snow::shader             mShader;
+    snow::Shader             mShader;
     // [TODO]: textures
     /* gl object */
     uint32_t mVAO, mVBO, mEBO;
