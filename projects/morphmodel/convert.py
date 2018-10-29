@@ -2,7 +2,7 @@ import os
 import h5py
 import struct
 
-h5_path = '../assets/ProbabilisticMorphableModels/data/'
+h5_path = '../../assets/ProbabilisticMorphableModels/data/'
 # h5_path = "/media/chaiyujin/FE6C78966C784B81/Linux/ThirdParty/ProbabilisticMorphableModels/data/"
 
 model_paths = {
