@@ -1,6 +1,7 @@
 assets/*
 face_*/build/*
 *DS_Store*
+.vscode/*
 
 # Prerequisites
 *.d
