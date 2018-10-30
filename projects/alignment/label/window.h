@@ -16,6 +16,17 @@ struct LabelData {
     ~LabelData () {}
 };
 
+struct VideoHelper {
+    std::shared_ptr<snow::StreamBase> mStream;
+    std::unique_ptr<snow::FrameBase>  mFrame;
+    int64_t                           mTimestamp;
+    float                             mSeconds;
+    bool                              mPlaying;
+
+    VideoHelper(): mStream(nullptr), mFrame(nullptr), mTimestamp(0), mSeconds(0.0), mPlaying(false) {}
+    ~VideoHelper() { mStream.reset(); mFrame.reset(); }
+};
+
 /** LabelWindow: labelling image or video
  *  - image 
  *  - video
@@ -25,16 +36,35 @@ class LabelWindow : public snow::AbstractWindow {
     // data source
     snow::Image *       mImagePtr;
     snow::MediaReader * mVideoPtr;
+    VideoHelper *       mVideoHelperPtr;
     // labelling data
     LabelData *         mDataPtr;
     // image shader
     ImageShader *       mShaderPtr;
+    // for selecting
+    std::string         mSelectedPath;
+    int                 mCurFileIndex;
+    std::vector<std::string> mFileList;
+    // forcing overwrite
+    bool                mForcingOverwrite;
+
+    // for easy video read
+    bool _getFrame();
+    void _drawTools();
+    void _drawVideoController();
 public:
-    LabelWindow(const char *title="label")
+    static const std::vector<std::string> ImageExtensions;
+    static const std::vector<std::string> VideoExtensions;
+    LabelWindow(const std::vector<std::string> &fileList,
+                const char *title="label")
         : snow::AbstractWindow(title)
-        , mImagePtr(nullptr), mVideoPtr(nullptr), mDataPtr(nullptr)
-        , mShaderPtr(nullptr)
+        , mImagePtr(nullptr), mVideoPtr(nullptr)
+        , mVideoHelperPtr(nullptr)
+        , mDataPtr(nullptr) , mShaderPtr(nullptr)
+        , mSelectedPath("") , mCurFileIndex(-1) , mFileList(fileList)
+        , mForcingOverwrite(false)
     {}
+    ~LabelWindow() { closeSource(); mFileList.clear(); mCurFileIndex = -1; }
 
     bool openVideo(std::string);
     bool openImage(std::string);
@@ -42,6 +72,7 @@ public:
 
     /*overwrite virtual functions*/
     void processEvent(SDL_Event &event) {}
+    bool onQuit(SDL_Event &event);
     void draw();
 };
 

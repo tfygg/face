@@ -3,8 +3,10 @@ using namespace snow::face;
 
 int main() {
     snow::App app;
-    LabelWindow *win = new LabelWindow();
-    win->openImage("../assets/fate.jpg");
+    LabelWindow *win = new LabelWindow({
+        "../assets/fate.jpg",
+        "../assets/0-0-1.mkv",
+    });
     app.addWindow(win);
     app.run();
 
