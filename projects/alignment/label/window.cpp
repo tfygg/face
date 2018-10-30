@@ -91,8 +91,9 @@ void LabelWindow::closeSource() {
 
 /* drawing */
 void LabelWindow::draw() {
-    _drawLandmarks(); // must be done before shader->draw()
+    mGuiHeight = 0;
     _drawTools();
+    _drawLandmarks(); // must be done before shader->draw()
     if (mVideoPtr) {
         _drawVideoController();
     }
@@ -103,27 +104,39 @@ void LabelWindow::draw() {
 }
 void LabelWindow::_drawLandmarks() {
     if (!mDataPtr) return;
-    ImGui::Begin("landmarks");
-    for (size_t i = 0; i < Landmarks::GenreList().size(); ++i) {
-        ImGui::RadioButton(Landmarks::GenreList()[i].c_str(), &(mDataPtr->mLmsGenre), (int)i);
-    }
-    ImGui::End();
+    ImGui::SetNextWindowPos(ImVec2(0, mGuiHeight), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(250, 180), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Landmarks");
+    mGuiHeight += ImGui::GetWindowSize().y;
+    ImGui::Text("%s", mLmsMessage.c_str());
     Landmarks *lmsPtr = nullptr;
     if (mImagePtr)      lmsPtr = mDataPtr->fetch(0);
     else if (mVideoPtr) lmsPtr = mDataPtr->fetch(mVideoHelperPtr->mTimestamp);
-    if (lmsPtr && lmsPtr->hasGenre(Landmarks::GenreList()[mDataPtr->mLmsGenre])) {
+    if (lmsPtr) {
+        int count = 0;
+        for (size_t i = 0; i < Landmarks::GenreList().size(); ++i) {
+            if (lmsPtr->hasGenre(Landmarks::GenreList()[i])) {
+                if (count % 2 == 1) ImGui::SameLine();
+                ImGui::RadioButton(Landmarks::GenreList()[i].c_str(), &(mDataPtr->mLmsGenre), (int)i);
+                count += 1;
+            }
+        }
+    }
+    if (ImGui::Button("Discard manually modified points"))
+        this->discardThisManualFrame();
+    if (lmsPtr && lmsPtr->hasGenre(Landmarks::GenreList()[mDataPtr->mLmsGenre]))
         mShaderPtr->updateLandmarks(lmsPtr->landmarks(Landmarks::GenreList()[mDataPtr->mLmsGenre]));
-    }
-    else {
+    else
         mShaderPtr->updateLandmarks(std::vector<snow::float2>(Landmarks::NumPoints(), {0, 0}));
-    }
+    ImGui::End();
 }
 void LabelWindow::_drawTools() {
     bool open = false;
     std::string focusPath = "";
-    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(0, mGuiHeight), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(250, 180), ImGuiCond_FirstUseEver);
     ImGui::Begin("Files");
+    mGuiHeight += ImGui::GetWindowSize().y;
     /* list */ {
         ImGui::PushItemWidth(-1);
         // IMGUI_API bool  ListBox(const char* label, int* current_item, bool (*items_getter)(void* data, int idx, const char** out_text), void* data, int items_count, int height_in_items = -1);
@@ -179,9 +192,10 @@ void LabelWindow::_drawVideoController() {
         _getFrame();
     };
     // snow::info("timestamp {}", mVideoHelperPtr->mTimestamp);
-    ImGui::SetNextWindowPos(ImVec2(0, 181), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(0, mGuiHeight), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(250, 100), ImGuiCond_FirstUseEver);
-    ImGui::Begin("player");
+    ImGui::Begin("Player");
+    mGuiHeight += ImGui::GetWindowSize().y;
     mVideoHelperPtr->mSeconds = (float)mVideoHelperPtr->mTimestamp / 1000.0f;
     if (ImGui::SliderFloat("sec", &mVideoHelperPtr->mSeconds, 0, mVideoPtr->duration() / 1000.0f)) {
         mVideoHelperPtr->mPlaying = false;
@@ -208,7 +222,7 @@ void LabelWindow::_drawVideoController() {
     ImGui::End();
     /* playing */
     if (mVideoHelperPtr->mPlaying) {
-        _getFrame();
+        if (!_getFrame()) mVideoHelperPtr->mPlaying = false;
     }
 }
 

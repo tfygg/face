@@ -17,12 +17,15 @@ Landmarks::~Landmarks() { mGenreMap.clear(); }
 
 /* methods */
 void Landmarks::setLandmarks(const std::string &genre) {
-    snow::assertion(ValidGenre(genre), "[Landmarks]: no such genre {}", genre);
-    mGenreMap.insert({genre, VECPTS(gNumPoints, {0, 0})});
+    this->setLandmarks(genre, VECPTS(gNumPoints, {0, 0}));
 }
 void Landmarks::setLandmarks(const std::string &genre, const VECPTS &ptsList) {
     snow::assertion(ValidGenre(genre), "[Landmarks]: no such genre {}", genre);
-    mGenreMap.insert({genre, ptsList});
+    auto iter = mGenreMap.find(genre);
+    if (iter == mGenreMap.end())
+        mGenreMap.insert({genre, ptsList});
+    else
+        iter->second = ptsList;
 }
 VECPTS &Landmarks::landmarks(const std::string &genre) {
     auto iter = mGenreMap.find(genre);
@@ -33,6 +36,10 @@ const VECPTS &Landmarks::landmarks(const std::string &genre) const {
     auto iter = mGenreMap.find(genre);
     snow::assertion(iter != mGenreMap.end(), "[Landmarks]: not set genre {}", genre);
     return iter->second;
+}
+void Landmarks::removeLandmarks(const std::string &genre) {
+    auto iter = mGenreMap.find(genre);
+    if (iter != mGenreMap.end()) mGenreMap.erase(iter);
 }
 
 /* stream */

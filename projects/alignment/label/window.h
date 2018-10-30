@@ -53,6 +53,13 @@ class LabelWindow : public snow::AbstractWindow {
     std::vector<std::string> mFileList;
     // forcing overwrite
     bool                mForcingOverwrite;
+    // for auto gui layout
+    float               mGuiHeight;
+    std::string         mLmsMessage;
+
+    // for manually adjusting
+    int                 mSelectPointIndex;
+    std::vector<snow::float2> mTmpPtsList;
 
     // for easy video read
     bool _getFrame();
@@ -70,6 +77,8 @@ public:
         , mDataPtr(nullptr) , mShaderPtr(nullptr)
         , mSelectedPath("") , mCurFileIndex(-1) , mFileList(fileList)
         , mForcingOverwrite(false)
+        , mGuiHeight(0.f), mLmsMessage("")
+        , mSelectPointIndex(-1)
     {}
     ~LabelWindow() { closeSource(); mFileList.clear(); mCurFileIndex = -1; }
 
@@ -78,9 +87,15 @@ public:
     void closeSource(); // close image or video, save and release data
 
     /*overwrite virtual functions*/
-    void processEvent(SDL_Event &event) {}
+    void processEvent(SDL_Event &event);
     bool onQuit(SDL_Event &event);
     void draw();
+
+    /* for manually adjusting */
+    void selectPoint(int x, int y);
+    void movePoint(int x, int y);
+    void releasePoint();
+    void discardThisManualFrame();
 };
 
 NAMESPACE_END
