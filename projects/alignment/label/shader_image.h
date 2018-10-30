@@ -143,8 +143,8 @@ public:
         mNumLandmarks = (int)data.size();
         for (size_t i = 0; i < data.size(); ++i) {
             int k = 20 + (int)i * 5;
-            mPointsPtr[k]     = data[i].x;
-            mPointsPtr[k + 1] = data[i].y;
+            mPointsPtr[k]     = data[i].x * 2.0 - 1.0;
+            mPointsPtr[k + 1] = 1.0 - data[i].y * 2.0;
             mPointsPtr[k + 2] = 0;
         }
         float *d = mPointsPtr + 20;

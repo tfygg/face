@@ -17,11 +17,11 @@ Landmarks::~Landmarks() { mGenreMap.clear(); }
 
 /* methods */
 void Landmarks::setLandmarks(const std::string &genre) {
-    snow::assertion(HasGenre(genre), "[Landmarks]: no such genre {}", genre);
+    snow::assertion(ValidGenre(genre), "[Landmarks]: no such genre {}", genre);
     mGenreMap.insert({genre, VECPTS(gNumPoints, {0, 0})});
 }
 void Landmarks::setLandmarks(const std::string &genre, const VECPTS &ptsList) {
-    snow::assertion(HasGenre(genre), "[Landmarks]: no such genre {}", genre);
+    snow::assertion(ValidGenre(genre), "[Landmarks]: no such genre {}", genre);
     mGenreMap.insert({genre, ptsList});
 }
 VECPTS &Landmarks::landmarks(const std::string &genre) {
@@ -40,14 +40,18 @@ std::ostream& operator<<(std::ostream &out, const Landmarks &lms) {
     out.precision(std::numeric_limits<float>::max_digits10);
     out << Landmarks::gNumPoints << std::endl;
     for (auto iter = lms.mGenreMap.begin(); iter != lms.mGenreMap.end(); ++iter) {
-        out << "genre: " << iter->first << std::endl;
+        out << "genre: " << iter->first;
         const auto &pts = iter->second;
         snow::assertion(pts.size() == Landmarks::gNumPoints,
                         "[Landamrks]: ostream << failed, due to size mismatch {} != {} (gNumPoints)",
                         pts.size(), Landmarks::gNumPoints);
-        for (size_t i = 0; i < pts.size(); ++i)
-            out << std::setw(32) << pts[i].x << " "
-                << std::setw(32) << pts[i].y << " ";
+        if (pts.size() == 0) out << std::endl;
+        else 
+            for (size_t i = 0; i < pts.size(); ++i) {
+                if (i % 5 == 0) out << std::endl;
+                out << std::setw(16) << pts[i].x << " "
+                    << std::setw(16) << pts[i].y << " ";
+            }
         out << std::endl;
     }
     // mark of end
@@ -65,6 +69,7 @@ std::istream& operator>>(std::istream &inp, Landmarks &lms) {
         std::getline(inp, genre);
         genre = snow::Trim(genre);
         if (genre.length() == 0) break;
+        genre = genre.substr(7);
         VECPTS pts(numPoints);
         for (size_t i = 0; i < pts.size(); ++i)
             inp >> pts[i].x >> pts[i].y;

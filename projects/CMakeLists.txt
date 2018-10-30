@@ -33,5 +33,6 @@ add_executable(${FACE_ALIGN}
     # morph
     ${FACE_ALIGN_DIR}/main.cpp
     ${FACE_ALIGN_DIR}/label/window.cpp
+    ${FACE_ALIGN_DIR}/label/label_data.cpp
 )
 target_link_libraries(${FACE_ALIGN} snow)

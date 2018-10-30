@@ -11,9 +11,15 @@ struct LabelData {
     int                          mType;
     std::string                  mLabelPath;
     std::map<int64_t, Landmarks> mTimeLmsMap;
+    int                          mLmsGenre;
 
-    LabelData(int type, std::string path): mType(type), mLabelPath(path + "_label.lms"), mTimeLmsMap() {}
-    ~LabelData () {}
+    LabelData(int type, std::string path);
+    ~LabelData();
+
+    Landmarks *fetch(int64_t ms);
+    bool loadFromFile_Legacy(const std::string &oldFormatPath);
+    bool loadFromFile();
+    bool saveIntoFile();
 };
 
 struct VideoHelper {
@@ -52,6 +58,7 @@ class LabelWindow : public snow::AbstractWindow {
     bool _getFrame();
     void _drawTools();
     void _drawVideoController();
+    void _drawLandmarks();
 public:
     static const std::vector<std::string> ImageExtensions;
     static const std::vector<std::string> VideoExtensions;

@@ -3,7 +3,7 @@
 
 NAMESPACE_BEGIN
 const std::vector<std::string> LabelWindow::ImageExtensions {"JPG", "JPEG", "PNG", "BMP"};
-const std::vector<std::string> LabelWindow::VideoExtensions {"MKV", "AVI", "MP4", "MPEG"};
+const std::vector<std::string> LabelWindow::VideoExtensions {"MKV", "AVI", "MP4", "MPEG", "FLV"};
 
 bool LabelWindow::_getFrame() {
     mVideoHelperPtr->mFrame = std::move(mVideoPtr->readFrame(mVideoHelperPtr->mStream.get()));
@@ -81,24 +81,8 @@ void LabelWindow::closeSource() {
             save = snow::App::Query("Save", "replace existed result or not?");
         if (save) { // saveing
             snow::info("save landmarks {}", mDataPtr->mLabelPath);
-            // rearange data
-#define TIME_LMS std::pair<int64_t, const Landmarks *>
-            std::vector<TIME_LMS> lmsList;
-            for (auto iter = mDataPtr->mTimeLmsMap.begin(); iter != mDataPtr->mTimeLmsMap.end(); ++iter)
-                lmsList.push_back({iter->first, &(iter->second)});
-            std::sort(lmsList.begin(), lmsList.end(), [](const TIME_LMS &a, const TIME_LMS &b) -> bool {
-                return a.first < b.first;
-            });
-#undef TIME_LMS
-            std::ofstream fout(mDataPtr->mLabelPath);
-            if (fout.is_open()) {
-                fout << lmsList.size() << std::endl;
-                for (auto pair : lmsList)
-                    fout << pair.first << " " << *(pair.second);
-                fout.close();
-            }
-            else snow::fatal("[LabelWindow]: failed to save result.");
-            lmsList.clear();
+            if (!mDataPtr->saveIntoFile())
+                snow::fatal("[LabelWindow]: failed to save result.");
         }
         // finally delete and set null
         delete mDataPtr; mDataPtr = nullptr;
@@ -107,6 +91,7 @@ void LabelWindow::closeSource() {
 
 /* drawing */
 void LabelWindow::draw() {
+    _drawLandmarks(); // must be done before shader->draw()
     _drawTools();
     if (mVideoPtr) {
         _drawVideoController();
@@ -114,6 +99,23 @@ void LabelWindow::draw() {
     if (mShaderPtr) {
         mShaderPtr->use();
         mShaderPtr->draw();
+    }
+}
+void LabelWindow::_drawLandmarks() {
+    if (!mDataPtr) return;
+    ImGui::Begin("landmarks");
+    for (size_t i = 0; i < Landmarks::GenreList().size(); ++i) {
+        ImGui::RadioButton(Landmarks::GenreList()[i].c_str(), &(mDataPtr->mLmsGenre), (int)i);
+    }
+    ImGui::End();
+    Landmarks *lmsPtr = nullptr;
+    if (mImagePtr)      lmsPtr = mDataPtr->fetch(0);
+    else if (mVideoPtr) lmsPtr = mDataPtr->fetch(mVideoHelperPtr->mTimestamp);
+    if (lmsPtr && lmsPtr->hasGenre(Landmarks::GenreList()[mDataPtr->mLmsGenre])) {
+        mShaderPtr->updateLandmarks(lmsPtr->landmarks(Landmarks::GenreList()[mDataPtr->mLmsGenre]));
+    }
+    else {
+        mShaderPtr->updateLandmarks(std::vector<snow::float2>(Landmarks::NumPoints(), {0, 0}));
     }
 }
 void LabelWindow::_drawTools() {
@@ -181,8 +183,10 @@ void LabelWindow::_drawVideoController() {
     ImGui::SetNextWindowSize(ImVec2(250, 100), ImGuiCond_FirstUseEver);
     ImGui::Begin("player");
     mVideoHelperPtr->mSeconds = (float)mVideoHelperPtr->mTimestamp / 1000.0f;
-    if (ImGui::SliderFloat("sec", &mVideoHelperPtr->mSeconds, 0, mVideoPtr->duration() / 1000.0f))
+    if (ImGui::SliderFloat("sec", &mVideoHelperPtr->mSeconds, 0, mVideoPtr->duration() / 1000.0f)) {
+        mVideoHelperPtr->mPlaying = false;
         _seek();
+    }
     /* frame by frame option */
     ImGui::SameLine();
     if (!mVideoHelperPtr->mPlaying) {
