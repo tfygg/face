@@ -82,6 +82,10 @@ class LabelWindow : public snow::AbstractWindow {
     std::list<Modification*>  mOpList;
     std::list<Modification*>::iterator mOpIter;
 
+    // for area
+    snow::float2              mAreaPos, mAreaSize;
+    snow::float2              mCurPos,  mCurSize;
+
     // for easy video read
     bool _getFrame();
     void _drawTools();
@@ -104,10 +108,10 @@ public:
         , mSelectedPath("") , mCurFileIndex(-1) , mFileList(fileList)
         , mForcingOverwrite(false)
         , mGuiHeight(0.f), mLmsMessage("")
-        , mSelectPointIndex(-1)
-        , mTmpPtsList(0)
-        , mOpList(0)
-        , mOpIter(mOpList.end())
+        , mSelectPointIndex(-1), mTmpPtsList(0)
+        , mOpList(0), mOpIter(mOpList.end())
+        , mAreaPos({0.f, 0.f}), mAreaSize({1.f, 1.f})
+        , mCurPos({-1.f, -1.f}), mCurSize({-1.f, -1.f})
     {}
     ~LabelWindow() {
         closeSource();
@@ -135,6 +139,12 @@ public:
     void movePoint(int x, int y);
     void releasePoint();
     void discardThisManualFrame();
+
+    /* for selecting area */
+    std::vector<int> validArea() const;
+    void selectArea(int x, int y);
+    void moveArea(int x, int y);
+    void doneArea();
 };
 
 NAMESPACE_END

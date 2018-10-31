@@ -14,8 +14,8 @@ bool LabelWindow::_getFrame() {
     if (mShaderPtr == nullptr) {
         // alloc shader
         mShaderPtr = new ImageShader(Landmarks::NumPoints());
-        // adjust ratio for draw()
-        this->setRatio((float)ptr->mWidth / (float)ptr->mHeight);
+        mAreaPos = {0.f, 0.f}; mAreaSize = {1.f, 1.f};
+        // this->setRatio((float)ptr->mWidth / (float)ptr->mHeight);
     }
     /* update data */ {
         mShaderPtr->uploadImage(ptr->data(), ptr->mWidth, ptr->mHeight, GL_RGBA);
@@ -64,7 +64,8 @@ bool LabelWindow::openImage(std::string filename) {
     mShaderPtr->uploadImage(mImagePtr->data(), mImagePtr->width(), mImagePtr->height(),
                             (mImagePtr->bpp() == 4)? GL_RGBA: GL_RGB);
     // adjust ratio for draw()
-    this->setRatio((float)mImagePtr->width() / (float) mImagePtr->height());
+    mAreaPos = {0.f, 0.f}; mAreaSize = {1.f, 1.f};
+    // this->setRatio((float)mImagePtr->width() / (float) mImagePtr->height());
     // alloc data
     mDataPtr = new LabelData(LabelData::TypeImage, filename);
     return true;
@@ -86,6 +87,28 @@ void LabelWindow::closeSource() {
         }
         // finally delete and set null
         delete mDataPtr; mDataPtr = nullptr;
+    }
+}
+
+std::vector<int> LabelWindow::validArea() const {
+    if (mRatio <= 0.0) {
+        return { (int)(width()  * mAreaPos.x),
+                 (int)(height() * mAreaPos.y),
+                 (int)(width()  * mAreaSize.x),
+                 (int)(height() * mAreaSize.y) };
+    }
+    else {
+        int glW = mWidth, glH = mHeight;
+        int glL = 0, glT = 0;
+        if (mRatio * mHeight > mWidth) { // smaller h
+            glH = int((float)mWidth / mRatio);
+            glT = (mHeight - glH) / 2;
+        }
+        else { // smaller w
+            glW = int((float)mHeight * mRatio);
+            glL = (mWidth - glW) / 2;
+        }
+        return {glL, glT, glW, glH};
     }
 }
 

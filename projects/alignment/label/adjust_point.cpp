@@ -83,7 +83,7 @@ void LabelWindow::_undoOperation(const Modification &modification) {
 void LabelWindow::selectPoint(int x, int y) {
     auto area = this->validArea();
     snow::float2 pos { (x - area[0]) / (float)area[2],
-                       (y - area[1]) / (float)area[3] };
+                       (y - (height() - area[1] - area[3])) / (float)area[3] };
     // get current landmarks
     const Landmarks *lmsPtr = nullptr;
     if (mImagePtr)      lmsPtr = mDataPtr->fetch(0);
@@ -122,7 +122,7 @@ void LabelWindow::movePoint(int x, int y) {
     auto &ptsList = lmsPtr->landmarks(Landmarks::GenreList()[mDataPtr->mLmsGenre]);
     auto area = this->validArea();
     ptsList[mSelectPointIndex].x = (float)(x - area[0]) / (float)area[2];
-    ptsList[mSelectPointIndex].y = (float)(y - area[1]) / (float)area[3];
+    ptsList[mSelectPointIndex].y = (float)(y - (height() - area[1] - area[3])) / (float)area[3];
 }
 void LabelWindow::releasePoint() {
     if (mSelectPointIndex < 0) return;
@@ -169,6 +169,15 @@ void LabelWindow::releasePoint() {
     mLmsMessage = "";
     mTmpPtsList.clear();
 }
+void LabelWindow::selectArea(int x, int y) {
+    
+}
+void LabelWindow::moveArea(int x, int y) {
+
+}
+void LabelWindow::doneArea() {
+
+}
 void LabelWindow::discardThisManualFrame() {
     // [TODO]: redo this operation
     {
@@ -191,26 +200,27 @@ void LabelWindow::discardThisManualFrame() {
     }
 }
 void LabelWindow::processEvent(SDL_Event &event) {
-    auto onLeftDown = [this](SDL_Event &event) -> void {
-        this->selectPoint(event.button.x, event.button.y);
-    };
-    auto onLeftMove = [this](SDL_Event &event) -> void {
-        this->movePoint(event.motion.x, event.motion.y);
-    };
-    auto onLeftUp   = [this](SDL_Event &event) -> void {
-        this->releasePoint();
-    };
+    auto onLeftDown  = [this](SDL_Event &event) -> void { this->selectPoint(event.button.x, event.button.y); };
+    auto onLeftMove  = [this](SDL_Event &event) -> void { this->movePoint(event.motion.x, event.motion.y);   };
+    auto onLeftUp    = [this](SDL_Event &event) -> void { this->releasePoint();                              };
+    auto onRightDown = [this](SDL_Event &event) -> void { this->selectArea(event.button.x, event.button.y);  };
+    auto onRightMove = [this](SDL_Event &event) -> void { this->moveArea(event.motion.x, event.motion.y);    };
+    auto onRightUp   = [this](SDL_Event &event) -> void { this->doneArea();                                  };
+
     if (event.type == SDL_MOUSEBUTTONDOWN) {
         // mouse dowwn
-        if (event.button.button == SDL_BUTTON_LEFT) onLeftDown(event);
+        if (event.button.button == SDL_BUTTON_LEFT)  onLeftDown(event);
+        if (event.button.button == SDL_BUTTON_RIGHT) onRightDown(event);
     }
     else if (event.type == SDL_MOUSEMOTION) {
         // mouse motion
-        if (event.button.button == SDL_BUTTON_LEFT) onLeftMove(event);
+        if (event.button.button == SDL_BUTTON_LEFT)  onLeftMove(event);
+        if (event.button.button == SDL_BUTTON_RIGHT) onRightMove(event);
     }
     else if (event.type == SDL_MOUSEBUTTONUP) {
         // mouse up
-        if (event.button.button == SDL_BUTTON_LEFT) onLeftUp(event);
+        if (event.button.button == SDL_BUTTON_LEFT)  onLeftUp(event);
+        if (event.button.button == SDL_BUTTON_RIGHT) onRightUp(event);
     }
 }
 
