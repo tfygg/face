@@ -4,7 +4,7 @@ using namespace snow::face;
 int main() {
     // set landmarks
     Landmarks::SetNumPoints(73);
-    Landmarks::SetGenreList({"actual", "dde", "dlib", "manual"});
+    Landmarks::SetGenreList({"auto", "manual"});
     
     snow::App app;
     LabelWindow *win = new LabelWindow({

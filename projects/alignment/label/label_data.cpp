@@ -30,13 +30,13 @@ bool LabelData::loadFromFile_Legacy(const std::string &oldFormatPath) {
         std::vector<snow::float2> pts(num);
         // actual
         for (int i = 0; i < num; ++i) fin >> pts[i].x >> pts[i].y;
-        if (state > 0) lms.setLandmarks("actual", pts);
+        if (state > 0) lms.setLandmarks("auto", pts);
         // dde
         for (int i = 0; i < num; ++i) fin >> pts[i].x >> pts[i].y;
-        if (state & 1) lms.setLandmarks("dde", pts);
+        if (state & 1) lms.setLandmarks("auto", pts);
         // dlib
         for (int i = 0; i < num; ++i) fin >> pts[i].x >> pts[i].y;
-        if (state & 4) lms.setLandmarks("dlib", pts);
+        if (state & 4) lms.setLandmarks("auto", pts);
         // manual
         for (int i = 0; i < num; ++i) fin >> pts[i].x >> pts[i].y;
         if (state & 2) lms.setLandmarks("manual", pts);

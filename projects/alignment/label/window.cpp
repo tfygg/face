@@ -121,9 +121,19 @@ void LabelWindow::_drawLandmarks() {
                 count += 1;
             }
         }
+        if (ImGui::Button("Discard manually modified points") && lmsPtr->hasGenre("manual")) {
+            this->discardThisManualFrame();
+        }
     }
-    if (ImGui::Button("Discard manually modified points"))
-        this->discardThisManualFrame();
+    // for operations
+    if (mOpList.size()) {
+        if (ImGui::Button("undo") && mOpIter != mOpList.begin()) {
+            _undoOperation(**(--mOpIter));
+        }
+        if (ImGui::Button("redo") && mOpIter != mOpList.end()) {
+            _redoOperation(**(mOpIter++));
+        }
+    }
     if (lmsPtr && lmsPtr->hasGenre(Landmarks::GenreList()[mDataPtr->mLmsGenre]))
         mShaderPtr->updateLandmarks(lmsPtr->landmarks(Landmarks::GenreList()[mDataPtr->mLmsGenre]));
     else

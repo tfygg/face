@@ -2,6 +2,7 @@
 #include "../../common.h"
 #include "../../utils/landmarks.h"
 #include "shader_image.h"
+#include <queue>
 NAMESPACE_BEGIN
 
 struct LabelData {
@@ -33,6 +34,24 @@ struct VideoHelper {
     ~VideoHelper() { mStream.reset(); mFrame.reset(); }
 };
 
+/* for operation */
+struct Modification {
+    static const int MaxOperations = 5;
+    enum OP { None = 0, MovePoint = 1, ReplaceManual = 2, DiscardManual = 3 };
+    OP      mOperation;
+    int64_t mTimestamp;
+    void *  mDataPtr;
+
+    Modification() : mOperation(OP::None), mTimestamp(0), mDataPtr(nullptr) {}
+    ~Modification() {
+        if (mOperation == MovePoint || mOperation == ReplaceManual)
+            delete (std::pair<std::vector<snow::float2>, std::vector<snow::float2>> *)mDataPtr;
+        else
+            delete (std::vector<snow::float2> *)mDataPtr;
+        mDataPtr = nullptr;
+    }
+};
+
 /** LabelWindow: labelling image or video
  *  - image 
  *  - video
@@ -40,32 +59,39 @@ struct VideoHelper {
  * */
 class LabelWindow : public snow::AbstractWindow {
     // data source
-    snow::Image *       mImagePtr;
-    snow::MediaReader * mVideoPtr;
-    VideoHelper *       mVideoHelperPtr;
+    snow::Image *             mImagePtr;
+    snow::MediaReader *       mVideoPtr;
+    VideoHelper *             mVideoHelperPtr;
     // labelling data
-    LabelData *         mDataPtr;
+    LabelData *               mDataPtr;
     // image shader
-    ImageShader *       mShaderPtr;
+    ImageShader *             mShaderPtr;
     // for selecting
-    std::string         mSelectedPath;
-    int                 mCurFileIndex;
-    std::vector<std::string> mFileList;
+    std::string               mSelectedPath;
+    int                       mCurFileIndex;
+    std::vector<std::string>  mFileList;
     // forcing overwrite
-    bool                mForcingOverwrite;
+    bool                      mForcingOverwrite;
     // for auto gui layout
-    float               mGuiHeight;
-    std::string         mLmsMessage;
+    float                     mGuiHeight;
+    std::string               mLmsMessage;
 
     // for manually adjusting
-    int                 mSelectPointIndex;
+    int                       mSelectPointIndex;
     std::vector<snow::float2> mTmpPtsList;
+    std::list<Modification*>  mOpList;
+    std::list<Modification*>::iterator mOpIter;
 
     // for easy video read
     bool _getFrame();
     void _drawTools();
     void _drawVideoController();
     void _drawLandmarks();
+
+    // for operations
+    void _redoOperation(const Modification &modification);
+    void _undoOperation(const Modification &modification);
+    void _pushOperation(Modification *ptr);
 public:
     static const std::vector<std::string> ImageExtensions;
     static const std::vector<std::string> VideoExtensions;
@@ -79,8 +105,21 @@ public:
         , mForcingOverwrite(false)
         , mGuiHeight(0.f), mLmsMessage("")
         , mSelectPointIndex(-1)
+        , mTmpPtsList(0)
+        , mOpList(0)
+        , mOpIter(mOpList.end())
     {}
-    ~LabelWindow() { closeSource(); mFileList.clear(); mCurFileIndex = -1; }
+    ~LabelWindow() {
+        closeSource();
+        mCurFileIndex     = -1;
+        mSelectPointIndex = -1;
+        mTmpPtsList.clear();
+        mFileList.clear();
+        while (mOpList.size() > 0) {
+            delete mOpList.front();
+            mOpList.pop_front();
+        }
+    }
 
     bool openVideo(std::string);
     bool openImage(std::string);
