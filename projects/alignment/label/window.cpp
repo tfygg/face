@@ -15,7 +15,7 @@ bool LabelWindow::_getFrame() {
         // alloc shader
         mShaderPtr = new ImageShader(Landmarks::NumPoints());
         mAreaPos = {0.f, 0.f}; mAreaSize = {1.f, 1.f};
-        // this->setRatio((float)ptr->mWidth / (float)ptr->mHeight);
+        this->setRatio((float)ptr->mWidth / (float)ptr->mHeight);
     }
     /* update data */ {
         mShaderPtr->uploadImage(ptr->data(), ptr->mWidth, ptr->mHeight, GL_RGBA);
@@ -65,7 +65,7 @@ bool LabelWindow::openImage(std::string filename) {
                             (mImagePtr->bpp() == 4)? GL_RGBA: GL_RGB);
     // adjust ratio for draw()
     mAreaPos = {0.f, 0.f}; mAreaSize = {1.f, 1.f};
-    // this->setRatio((float)mImagePtr->width() / (float) mImagePtr->height());
+    this->setRatio((float)mImagePtr->width() / (float) mImagePtr->height());
     // alloc data
     mDataPtr = new LabelData(LabelData::TypeImage, filename);
     return true;

@@ -5,3 +5,4 @@ Use OpenCV to detect face and DLib to align landmarks.
 - [x] undo, redo modification
 - [ ] export training frames
 - [ ] using dlib to train and detect.
+- [ ] select a small area.
